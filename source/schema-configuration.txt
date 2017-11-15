@@ -10,9 +10,6 @@ Schema Generation and Management
    :depth: 1
    :class: singlecol
 
-Overview
---------
-
 Business intelligence tools connect to a data source and, given a fixed
 tabular schema, allow users to visually explore their data.
 MongoDB uses a :manual:`flexible schema </data-modeling>`, so some
@@ -26,6 +23,8 @@ creating and managing a relational schema.
 |bi-short|'s proxy server, :program:`mongosqld`, has startup options
 which determine how it handles schema management. These are covered in
 detail in the :program:`mongosqld` usage documentation.
+
+.. _bi-cached-sampling:
 
 Cached Sampling
 ---------------
@@ -49,10 +48,39 @@ If you need to manually edit your schema to ensure correct
 representation of your data, you can use a
 :ref:`schema file <schema-with-drdl-file>` instead.
 
+User Permissions
+~~~~~~~~~~~~~~~~
+
+To run |bi-short| in cached sampling mode, a MongoDB user needs
+permission to create a schema from any database in the deployment. Give
+this user the :authrole:`readAnyDatabase` role.
+
+.. example::
+
+   Use the MongoDB shell to add a user to the ``admin`` database with
+   the proper permissions to read any database and read and write the
+   schema database.
+
+   .. code-block:: javascript
+      :class: copyable
+ 
+      db.getSiblingDB("admin").createUser(
+        {
+          user: "<username>",
+          pwd: "<password>",
+          roles: ["readAnyDatabase"]
+        }
+      )
+
+.. seealso:: 
+
+   - :option:`mongosqld --auth <--auth>`
+   - :manual:`Enable Authentication </tutorial/enable-authentication>`
+
 .. _resample-schema-data:
 
 Resample Schema Data with ``FLUSH SAMPLE``
-------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When the :program:`mongosqld` process starts it creates a
 :doc:`schema </schema-configuration>`, either from a
@@ -82,6 +110,8 @@ at a user-specified interval.
 
    :option:`--sampleMode`
 
+.. _bi-persistent-schema:
+
 Persist a Schema in MongoDB
 ---------------------------
 
@@ -102,6 +132,40 @@ option determines how frequently :program:`mongosqld` resamples data
 to update the schema.
 
 .. include:: /includes/fact-resample-schema-data.rst
+
+User Permissions
+~~~~~~~~~~~~~~~~
+
+To run |bi-short| in persisted schema mode, a MongoDB user needs
+permission to create a schema from any database in the deployment and
+read and write entries into the schema database. Give this user the
+:authrole:`readAnyDatabase` role and the :authrole:`readWrite` role on
+the database that stores the schema (set using :option:`--sampleMode`)
+
+.. example::
+
+   Use the MongoDB shell to add a user to the ``admin`` database with the proper
+   permissions to read any database and read and write the schema
+   database.
+
+   .. code-block:: javascript
+      :class: copyable
+ 
+      db.getSiblingDB("admin").createUser(
+        {
+          user: "<username>",
+          pwd: "<password>",
+          roles: [
+            "readAnyDatabase",
+            { role: "readWrite", db: "<schemaDb>" }
+          ]
+        }
+      )
+
+.. seealso:: 
+
+   - :option:`mongosqld --auth <--auth>`
+   - :manual:`Enable Authentication </tutorial/enable-authentication>`
 
 .. _schema-with-drdl-file:
 
