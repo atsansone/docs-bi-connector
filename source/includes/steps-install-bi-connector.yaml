@@ -196,6 +196,22 @@ action:
 
          systemctl enable mongosql.service
 
+  - heading: "Amazon Linux"
+    content: |
+
+      .. cssclass:: copyable-code
+      .. code-block:: sh
+
+         mongosqld install --config {pathToConfigFile}/mongosqld.conf
+         initctl start mongosql
+
+      To enable the service so it starts automatically at boot time, run
+      the following:
+
+      .. cssclass:: copyable-code
+      .. code-block:: sh
+
+         chkconfig mongosql on
   - heading: "macOS"
     language: sh
     copyable: true
